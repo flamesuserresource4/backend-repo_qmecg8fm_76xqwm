@@ -11,7 +11,7 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from typing import Optional
 
 # Example schemas (replace with your own):
@@ -41,8 +41,22 @@ class Product(BaseModel):
 # Add your own schemas here:
 # --------------------------------------------------
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class ModelFile(BaseModel):
+    """
+    Model files uploaded via Admin Panel
+    Collection name: "modelfile"
+    """
+    name: str = Field(..., description="Original filename of the uploaded model archive")
+    size: int = Field(..., ge=0, description="Size in bytes")
+    content_type: str = Field(..., description="MIME type, e.g. application/zip")
+    data_b64: str = Field(..., description="Base64-encoded file content of the model .zip")
+    active: bool = Field(True, description="Whether this model is currently active")
+
+class ModelConfig(BaseModel):
+    """
+    Configuration for active inference source
+    Collection name: "modelconfig"
+    """
+    source_type: str = Field(..., description="'url' or 'db' to indicate model source")
+    url: Optional[HttpUrl] = Field(None, description="Public URL of Teachable Machine model.json")
+    active: bool = Field(True, description="Whether this config is active")
